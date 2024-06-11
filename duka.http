@@ -1,0 +1,6 @@
+@duka_HostAddress = http://localhost:5143
+
+GET {{duka_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

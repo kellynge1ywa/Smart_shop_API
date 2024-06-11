@@ -1,0 +1,42 @@
+version: '3.8'
+
+networks:
+  dev:
+    driver: bridge
+
+services:
+  
+  appdb:
+    container_name:  appdb
+    image: postgres:latest
+    ports:
+      - "5432:5432"
+
+    restart: always  
+
+    environment:
+      POSTGRES_DB: smartshopdb
+      POSTGRES_USER: ngeiywa
+      POSTGRES_PASSWORD: kelly@postgres1
+    volumes:
+      - appdata:/var/lib/postgresql/data
+   
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@kelly.com
+      PGADMIN_DEFAULT_PASSWORD: kelly
+    ports:
+    - "5050:80"
+    depends_on:
+      -  appdb
+
+    
+    networks:
+      - dev  
+
+volumes:
+  appdata: {}  
+      
+#docker.io/library/demoapp        
