@@ -62,7 +62,7 @@ public class CategoryController : ControllerBase
     }
 
     [HttpPost]
-    // [Authorize(Policy ="Admin")]
+    [Authorize(Policy ="Admin")]
     public async Task<ActionResult<ResponseDto>> AddCategory(AddCategory newCategory)
     {
         try

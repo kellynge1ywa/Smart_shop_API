@@ -40,6 +40,55 @@ public class ProductController:ControllerBase
             return StatusCode(500, _response);
         }
     }
+
+    [HttpGet("categoryproducts/{categoryId}")]
+    public async Task<ActionResult<ResponseDto>> GetProductsByCategoryId(Guid categoryId)
+    {
+        try
+        {
+            var products=await _productServices.GetProductsByCategoryId(categoryId);
+            if (products == null)
+            {
+                _response.Error="Products not found";
+                return NotFound(_response);
+            }
+            
+            _response.Result=products;
+            return Ok(_response);
+
+        }
+        catch (Exception ex)
+        {
+            _response.Error = ex.InnerException != null ? ex.InnerException.Message : ex.Message;
+            return StatusCode(500, _response);
+        }
+    }
+
+    [HttpGet("category/{categoryIdentifier}")]
+    public async Task<ActionResult<ResponseDto>> GetProductByIdentifier(string categoryIdentifier)
+    {
+        try
+        {
+            var products=await _productServices.GetProductsByCategory(categoryIdentifier.ToLower());
+            if (products == null)
+            {
+                _response.Error="Products not found";
+                return NotFound(_response);
+            }
+            
+            _response.Result=products;
+            return Ok(_response);
+
+        }
+        catch (Exception ex)
+        {
+            _response.Error = ex.InnerException != null ? ex.InnerException.Message : ex.Message;
+            return StatusCode(500, _response);
+        }
+    }
+
+
+
     [HttpGet("{Id}")]
     public async Task<ActionResult<ResponseDto>> GetProduct(Guid Id)
     {
@@ -63,7 +112,7 @@ public class ProductController:ControllerBase
     }
     
     [HttpPost("{categoryId}")]
-    // [Authorize]
+    [Authorize(Policy ="Admin")]
     public async Task<ActionResult<ResponseDto>> AddProduct(Guid categoryId,AddProduct newProduct)
     {
         try

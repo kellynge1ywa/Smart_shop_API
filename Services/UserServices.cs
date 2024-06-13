@@ -11,134 +11,89 @@ public class UserServices : IUser
     private readonly AppDbContext _dbContext;
     private readonly IMapper _mapper;
     private readonly IJwt _jwt;
-    private readonly UserManager<User> _userManager;
-    private readonly RoleManager<IdentityRole> _roleManager;
-    public UserServices(AppDbContext dbContext,IMapper mapper,IJwt jwt, UserManager<User> userManager,RoleManager<IdentityRole> roleManager)
+
+    public UserServices(AppDbContext dbContext, IMapper mapper, IJwt jwt)
     {
-        _dbContext=dbContext;
-        _mapper=mapper;
-        _jwt=jwt;
-        _userManager=userManager;
-        _roleManager=roleManager;
+        _dbContext = dbContext;
+        _mapper = mapper;
+        _jwt = jwt;
+
     }
 
     public async Task<string> DeleteUser(User user)
     {
-        _dbContext.Users.Remove(user);
+        _dbContext.AppUsers.Remove(user);
         await _dbContext.SaveChangesAsync();
         return "User deleted";
     }
 
-    
+
 
     public async Task<User> GetOneUser(Guid UserId)
     {
-        return await _dbContext.AppUsers.Where(user=>user.Id == UserId.ToString()).FirstOrDefaultAsync();
+        return await _dbContext.AppUsers.Where(user => user.Id == UserId).FirstOrDefaultAsync();
     }
 
     public async Task<User> GetUser(Guid userId, string token)
     {
-        return await _dbContext.AppUsers.Where(user=> user.Id == userId.ToString()).FirstOrDefaultAsync();
+        return await _dbContext.AppUsers.Where(user => user.Id == userId).FirstOrDefaultAsync();
     }
 
-    public async Task<List<UserDto>> GetUsers()
+    public async Task<User> GetUserByEmail(string Email)
     {
-        var users= await _dbContext.AppUsers.Select(user=> _mapper.Map<UserDto>(user)).ToListAsync();
+        return await _dbContext.AppUsers.Where(user => user.Email.ToLower() == Email.ToLower()).FirstOrDefaultAsync();
+    }
+
+    public async Task<List<User>> GetUsers()
+    {
+        var users = await _dbContext.AppUsers.ToListAsync();
         return users;
 
     }
 
-    public async Task<LoginResponseDto> SignInUser(LoginRequestDto loginRequest)
+    public Task<LoginResponseDto> SignInUser(LoginRequestDto loginRequest)
     {
-        var user=await _dbContext.AppUsers.Where(user=> user.UserName.ToLower() == loginRequest.Email.ToLower()).FirstOrDefaultAsync();
-
-        var checkPassword=await  _userManager.CheckPasswordAsync(user,loginRequest.Password);
-        if(!checkPassword || user == null)
-        {
-            return new LoginResponseDto();
-        }
-
-        var loggedUser= _mapper.Map<UserDto>(user);
-        var roles=await _userManager.GetRolesAsync(user);
-        var token=_jwt.GenerateToken(user,roles);
-
-        var loggedInUser=new LoginResponseDto()
-        {
-            UserDto=loggedUser,
-            Token=token
-        };
-        return loggedInUser;
-
+        throw new NotImplementedException();
     }
 
-    public async Task<string> SignUpUser(RegisterUserDto NewUser)
+    // public async Task<LoginResponseDto> SignInUser(LoginRequestDto loginRequest)
+    // {
+
+    // }
+
+    public async Task<string> SignUpUser(User NewUser)
     {
-        var newUser= _mapper.Map<User>(NewUser);
+        var isFirstUser = _dbContext.AppUsers.Any();
 
-        var isFirstUser=!_dbContext.AppUsers.Any();
-
-        using (var transaction=await _dbContext.Database.BeginTransactionAsync())
+        if (!isFirstUser)
         {
-            var result=await _userManager.CreateAsync(newUser, NewUser.Password);
-
-            if(result.Succeeded)
-            {
-                if(isFirstUser)
-                {
-                    
-                    if (!await _roleManager.RoleExistsAsync("Admin"))
-                    {
-                        var roleResult = await _roleManager.CreateAsync(new IdentityRole("Admin"));
-                        if (!roleResult.Succeeded)
-                        {
-                            transaction.Rollback();
-                            return "Failed to create Admin role";
-                        }
-                    }
-                    
-                    await _userManager.AddToRoleAsync(newUser,"Admin");
-                }
-
-                await _dbContext.SaveChangesAsync();
-                transaction.Commit();
-                return "User registered";
-            }
-            else
-            {
-                transaction.Rollback();
-                return result.Errors.FirstOrDefault()!.Description;
-            }
+            NewUser.Role = "Admin";
         }
+        _dbContext.AppUsers.Add(NewUser);
+        await _dbContext.SaveChangesAsync();
+        return "User registered";
     }
 
     public async Task<string> UpdateUser(Guid Id, RegisterUserDto updateUser)
     {
-        using (var transaction= await _dbContext.Database.BeginTransactionAsync())
+        var user = await _dbContext.AppUsers.Where(user => user.Id == Id).FirstOrDefaultAsync();
+        if (user != null)
         {
-            var userToUpdate=await _userManager.FindByIdAsync(Id.ToString());
+            user.Fullname = updateUser.Fullname;
+            user.Email = updateUser.Email;
+            user.Password=updateUser.Password;
+            user.PhoneNumber=updateUser.PhoneNumber;
+            user.Residence=updateUser.Residence;
 
-            if (userToUpdate == null)
-            {
-                return "User not found";
-            }
-
-            _mapper.Map(updateUser, userToUpdate);
-
-            if(!string.IsNullOrEmpty(updateUser.Password))
-            {
-                var passwordUpdate=await _userManager.ChangePasswordAsync(userToUpdate,updateUser.Password,updateUser.Password);
-                if(!passwordUpdate.Succeeded)
-                {
-                    transaction.Rollback();
-                    return passwordUpdate.Errors.FirstOrDefault()?.Description;
-                }
-            }
-
-            await _userManager.UpdateAsync(userToUpdate);
             await _dbContext.SaveChangesAsync();
-            transaction.Commit();
-            return "User updated successfully!!";
-        }
+            return "User updated!!";
 
+        }
+        return "User not found";
     }
+
+    // public async Task<string> UpdateUser(Guid Id, RegisterUserDto updateUser)
+    // {
+
+    // }
 }

@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("duka")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+6a7a36bfa4a9b68bae424120e131748948c70e59")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+0fa4aa431ed1ef56faa52be593d4e3e25bfd57d6")]
 [assembly: System.Reflection.AssemblyProductAttribute("duka")]
 [assembly: System.Reflection.AssemblyTitleAttribute("duka")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

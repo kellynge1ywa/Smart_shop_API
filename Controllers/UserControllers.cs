@@ -1,4 +1,6 @@
 ﻿using System.Security.Claims;
+using AutoMapper;
+using BCrypt.Net;
 using Microsoft.AspNetCore.Mvc;
 
 namespace duka;
@@ -9,9 +11,13 @@ public class UserController : ControllerBase
 {
     private readonly IUser _userServices;
     private readonly ResponseDto _response;
-    public UserController(IUser user)
+    private readonly IMapper _mapper;
+     private readonly IJwt _jwt;
+    public UserController(IUser user,IMapper mapper, IJwt jwt)
     {
         _userServices = user;
+        _mapper=mapper;
+        _jwt=jwt;
         _response = new ResponseDto();
     }
 
@@ -99,15 +105,18 @@ public class UserController : ControllerBase
     {
         try
         {
-            var response= await _userServices.SignUpUser(registerUser);
-            if (!string.IsNullOrWhiteSpace(response))
+            var newuser= _mapper.Map<User>(registerUser);
+            newuser.Password=BCrypt.Net.BCrypt.HashPassword(registerUser.Password);
+            var checkMail= await _userServices.GetUserByEmail(registerUser.Email);
+            if( checkMail != null)
             {
-                _response.Result="Registration successful";
-                return Created("", _response);
+                _response.Error="Email exists";
+                return BadRequest(_response);
             }
-            _response.Error=response;
-            _response.Success=false;
-            return BadRequest(_response);
+             var result= await _userServices.SignUpUser(newuser);
+            _response.Result=result;
+            
+            return Created("",_response);
 
         }
         catch (Exception ex)
@@ -119,19 +128,32 @@ public class UserController : ControllerBase
     }
 
      [HttpPost("login")]
-    public async Task<ActionResult<ResponseDto>> LoginUser(LoginRequestDto loginRequest)
+    public async Task<ActionResult<LoginResponseDto>> LoginUser(LoginRequestDto loginRequest)
     {
         try
         {
-            var response= await _userServices.SignInUser(loginRequest);
-            if (response.UserDto != null)
-            {
-                _response.Result=response;
-                return Created("", _response);
+            var checkUser= await _userServices.GetUserByEmail(loginRequest.Email);
+            if(checkUser == null){
+                _response.Error="Email not found";
+                return BadRequest(_response);
             }
-            _response.Error="Wrong credentials!!";
-            _response.Success=false;
-            return BadRequest(_response);
+            var checkPassword= BCrypt.Net.BCrypt.Verify(loginRequest.Password,checkUser.Password);
+            if(!checkPassword)
+            {
+                _response.Error="Wrong Password";
+                return BadRequest(_response);
+            }
+            var token= _jwt.GenerateToken(checkUser);
+
+            var loggedUser= new LoginResponseDto()
+            {
+                Token=token,
+                User=checkUser
+            };
+
+            _response.Result=loggedUser;
+            return Ok(_response);
+            
 
         }
         catch (Exception ex)
@@ -153,17 +175,29 @@ public class UserController : ControllerBase
                 _response.Error="User not found";
                 return NotFound(_response);
             }
-            var userId= Guid.Parse(user.Id);
+            var userId= user.Id;
 
-            var response= await _userServices.UpdateUser(userId,updateUser);
-            if (!string.IsNullOrWhiteSpace(response))
+            var updateduser= new User ()
             {
-                _response.Result="Update successful";
-                return Created("", _response);
-            }
-            _response.Error=response;
-            _response.Success=false;
-            return BadRequest(_response);
+                Id=userId,
+                Fullname=updateUser.Fullname,
+                Email=updateUser.Email,
+                PhoneNumber=updateUser.PhoneNumber,
+                Password=BCrypt.Net.BCrypt.HashPassword(updateUser.Password),
+                Residence=updateUser.Residence,
+                Role=user.Role
+            };
+         
+            // var checkMail= await _userServices.GetUserByEmail(updateUser.Email);
+            // if( checkMail == null)
+            // {
+            //     _response.Error="Email exists";
+            //     return BadRequest(_response);
+            // }
+             var result= await _userServices.UpdateUser(user.Id,updateUser);
+            _response.Result=result;
+            
+            return Created("",_response);
 
         }
         catch (Exception ex)
@@ -184,7 +218,7 @@ public class UserController : ControllerBase
                 _response.Error="User not found";
                 return NotFound(_response);
             }
-            var userId= Guid.Parse(user.Id);
+            var userId= user.Id;
 
             var response= await _userServices.UpdateUser(userId,updateUser);
             if (!string.IsNullOrWhiteSpace(response))

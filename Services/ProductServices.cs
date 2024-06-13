@@ -34,6 +34,21 @@ public class ProductServices : Iproduct
         return await _appDbContext.Products.ToListAsync();
     }
 
+    public async Task<List<Product>> GetProductsByCategory(string categoryIdentifier)
+    {
+        return await _appDbContext.Products.Where(product=> product.CategoryIdentifier == categoryIdentifier).ToListAsync();
+    }
+
+    public async Task<List<Product>> GetProductsByCategoryId(Guid categoryId)
+    {
+        return await _appDbContext.Products.Where(product=> product.CategoryId == categoryId).ToListAsync();
+    }
+
+    public async Task<List<Product>> GetProductsByIdentifier(string Identifier)
+    {
+        return await _appDbContext.Products.Where(product=>product.CategoryIdentifier.ToLower() == Identifier.ToLower()).ToListAsync();
+    }
+
     public async Task<string> UpdateProduct(Guid Id,Product updatedProduct)
     {
         var product=await _appDbContext.Products.Where(product=> product.Id == Id).FirstOrDefaultAsync();

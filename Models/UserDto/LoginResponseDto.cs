@@ -4,6 +4,6 @@ public class LoginResponseDto
 {
     public string Token { get; set; } = "";
 
-        public UserDto UserDto { get; set; } = default!;
+        public User User { get; set; } = default!;
 
 }

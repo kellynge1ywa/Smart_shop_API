@@ -14,15 +14,19 @@ public class JwtServices : IJwt
     {
         _jwtOptions=options.Value;
     }
-    public string GenerateToken(User appUser, IEnumerable<string> Roles)
+    public string GenerateToken(User appUser)
     {
         var userKey=new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtOptions.SecretKey));
         var cred=new SigningCredentials(userKey,SecurityAlgorithms.HmacSha256);
 
         List<Claim> claims=new List<Claim>();
-        claims.Add(new Claim(System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Sub, appUser.Id.ToString()));
+        claims.Add(new Claim("Roles",appUser.Role));
+        claims.Add(new Claim(JwtRegisteredClaimNames.Sub, appUser.Id.ToString()));
+        claims.Add(new Claim(JwtRegisteredClaimNames.Email, appUser.Email));
+        // claims.Add(new Claim(JwtRegisteredClaimNames.Sub, appUser.Id.ToString()));
+        // claims.Add(new Claim(System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Sub, appUser.Id.ToString()));
 
-        claims.AddRange(Roles.Select(k=> new Claim(ClaimTypes.Role,k)));
+        
 
         //token
         var tokenDescriptor=new SecurityTokenDescriptor()
