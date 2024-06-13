@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace duka.Migrations
 {
     /// <inheritdoc />
-    public partial class smartDb : Migration
+    public partial class smartshop : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -59,6 +59,7 @@ namespace duka.Migrations
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     Name = table.Column<string>(type: "text", nullable: false),
+                    Identifier = table.Column<string>(type: "text", nullable: false),
                     ImageURL = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
@@ -74,6 +75,7 @@ namespace duka.Migrations
                     Name = table.Column<string>(type: "text", nullable: false),
                     ImageURL = table.Column<string>(type: "text", nullable: false),
                     Price = table.Column<int>(type: "integer", nullable: false),
+                    CategoryIdentifier = table.Column<string>(type: "text", nullable: false),
                     CategoryId = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>

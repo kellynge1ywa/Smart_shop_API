@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace duka;
 [Route("api/[controller]")]
@@ -7,10 +8,13 @@ namespace duka;
 public class ProductController:ControllerBase
 {
     private readonly Iproduct _productServices;
+
+     private readonly Icategory _categoryServices;
     private readonly ResponseDto _response;
-    public ProductController(Iproduct iproduct)
+    public ProductController(Iproduct iproduct,Icategory icategory)
     {
         _productServices=iproduct;
+        _categoryServices=icategory;
         _response=new ResponseDto();
     }
 
@@ -59,16 +63,19 @@ public class ProductController:ControllerBase
     }
     
     [HttpPost("{categoryId}")]
+    // [Authorize]
     public async Task<ActionResult<ResponseDto>> AddProduct(Guid categoryId,AddProduct newProduct)
     {
         try
         {
+            var category= await _categoryServices.GetCategory(categoryId);
             var new_product=new Product()
             {
                 Id=new Guid(),
                 Name=newProduct.Name,
                 Price=newProduct.Price,
                 ImageURL=newProduct.ImageURL,
+                CategoryIdentifier=category.Identifier,
                 CategoryId=categoryId
             };
             var product= await _productServices.AddProduct(new_product);
@@ -84,6 +91,7 @@ public class ProductController:ControllerBase
     }
 
     [HttpPut("{Id}")]
+    [Authorize]
     public async Task<ActionResult<ResponseDto>> UpdateProduct(Guid Id, AddProduct updateProduct)
     {
         try
@@ -101,6 +109,7 @@ public class ProductController:ControllerBase
                 Id=product.Id,
                 Name=updateProduct.Name ?? product.Name,
                 Price=updateProduct.Price,
+                CategoryIdentifier=product.CategoryIdentifier,
                 ImageURL=updateProduct.ImageURL ?? product.ImageURL,
                 CategoryId=product.CategoryId
 
@@ -127,6 +136,7 @@ public class ProductController:ControllerBase
     }
 
      [HttpPatch("{Id}")]
+     [Authorize]
     public async Task<ActionResult<ResponseDto>> UpdateProductfield(Guid Id, AddProduct updateProduct)
     {
         try
@@ -144,6 +154,7 @@ public class ProductController:ControllerBase
                 Id=product.Id,
                 Name=updateProduct.Name ?? product.Name,
                 Price=updateProduct.Price,
+                CategoryIdentifier=product.CategoryIdentifier,
                 ImageURL=updateProduct.ImageURL ?? product.ImageURL,
                 CategoryId=product.CategoryId
 
@@ -171,6 +182,7 @@ public class ProductController:ControllerBase
 
 
     [HttpDelete("{Id}")]
+    [Authorize]
     public async Task<ActionResult<ResponseDto>> DeleteProduct (Guid Id)
     {
         try

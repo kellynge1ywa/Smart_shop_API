@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace duka;
 [Route("api/[controller]")]
@@ -15,6 +16,7 @@ public class CategoryController : ControllerBase
     }
 
     [HttpGet]
+    // [Authorize]
     public async Task<ActionResult<ResponseDto>> GetCategories()
     {
         try
@@ -60,6 +62,7 @@ public class CategoryController : ControllerBase
     }
 
     [HttpPost]
+    // [Authorize(Policy ="Admin")]
     public async Task<ActionResult<ResponseDto>> AddCategory(AddCategory newCategory)
     {
         try
@@ -68,6 +71,7 @@ public class CategoryController : ControllerBase
             {
                 Id = new Guid(),
                 Name = newCategory.Name,
+                Identifier=newCategory.Name.ToLower(),
                 ImageURL = newCategory.ImageURL
             };
             var addedCategory = await _categoryServices.AddCategory(new_category);
@@ -83,6 +87,7 @@ public class CategoryController : ControllerBase
     }
 
     [HttpPut("{Id}")]
+    [Authorize]
     public async Task<ActionResult<ResponseDto>> UpdateCategory(Guid Id, AddCategory updateCategory)
     {
         try
@@ -123,6 +128,7 @@ public class CategoryController : ControllerBase
         }
     }
     [HttpDelete("{Id}")]
+    [Authorize]
     public async Task<ActionResult<ResponseDto>> DeleteCategory(Guid Id)
     {
         try

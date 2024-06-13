@@ -6,8 +6,9 @@ networks:
 
 services:
   
+ 
   appdb:
-    container_name:  appdb
+    container_name: appdb
     image: postgres:latest
     ports:
       - "5432:5432"
@@ -15,11 +16,13 @@ services:
     restart: always  
 
     environment:
-      POSTGRES_DB: smartshopdb
-      POSTGRES_USER: ngeiywa
+      POSTGRES_DB: smartshop
+      POSTGRES_USER: postgres
       POSTGRES_PASSWORD: kelly@postgres1
     volumes:
-      - appdata:/var/lib/postgresql/data
+      - app_data:/var/lib/postgresql/data
+
+    
    
   pgadmin:
     image: dpage/pgadmin4:latest
@@ -28,15 +31,10 @@ services:
       PGADMIN_DEFAULT_EMAIL: admin@kelly.com
       PGADMIN_DEFAULT_PASSWORD: kelly
     ports:
-    - "5050:80"
+    - "5051:80"
     depends_on:
-      -  appdb
-
+      - appdb
     
-    networks:
-      - dev  
 
 volumes:
-  appdata: {}  
-      
-#docker.io/library/demoapp        
+  app_data:   

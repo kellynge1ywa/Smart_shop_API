@@ -74,14 +74,28 @@ public class UserServices : IUser
     public async Task<string> SignUpUser(RegisterUserDto NewUser)
     {
         var newUser= _mapper.Map<User>(NewUser);
+
+        var isFirstUser=!_dbContext.AppUsers.Any();
+
         using (var transaction=await _dbContext.Database.BeginTransactionAsync())
         {
             var result=await _userManager.CreateAsync(newUser, NewUser.Password);
 
             if(result.Succeeded)
             {
-                if(!_dbContext.AppUsers.Any())
+                if(isFirstUser)
                 {
+                    
+                    if (!await _roleManager.RoleExistsAsync("Admin"))
+                    {
+                        var roleResult = await _roleManager.CreateAsync(new IdentityRole("Admin"));
+                        if (!roleResult.Succeeded)
+                        {
+                            transaction.Rollback();
+                            return "Failed to create Admin role";
+                        }
+                    }
+                    
                     await _userManager.AddToRoleAsync(newUser,"Admin");
                 }
 

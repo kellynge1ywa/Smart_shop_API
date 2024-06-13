@@ -12,8 +12,8 @@ using duka;
 namespace duka.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20240611144825_smartDb")]
-    partial class smartDb
+    [Migration("20240612142046_smartshop")]
+    partial class smartshop
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -163,6 +163,10 @@ namespace duka.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<string>("Identifier")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<string>("ImageURL")
                         .IsRequired()
                         .HasColumnType("text");
@@ -184,6 +188,10 @@ namespace duka.Migrations
 
                     b.Property<Guid>("CategoryId")
                         .HasColumnType("uuid");
+
+                    b.Property<string>("CategoryIdentifier")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<string>("ImageURL")
                         .IsRequired()

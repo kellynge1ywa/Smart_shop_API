@@ -160,6 +160,10 @@ namespace duka.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<string>("Identifier")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<string>("ImageURL")
                         .IsRequired()
                         .HasColumnType("text");
@@ -181,6 +185,10 @@ namespace duka.Migrations
 
                     b.Property<Guid>("CategoryId")
                         .HasColumnType("uuid");
+
+                    b.Property<string>("CategoryIdentifier")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<string>("ImageURL")
                         .IsRequired()

@@ -119,3 +119,4 @@ D:\projects\React\smart_shop\backend\duka\bin\Debug\net8.0\Microsoft.IdentityMod
 D:\projects\React\smart_shop\backend\duka\bin\Debug\net8.0\Microsoft.IdentityModel.Protocols.OpenIdConnect.dll
 D:\projects\React\smart_shop\backend\duka\bin\Debug\net8.0\Microsoft.IdentityModel.Tokens.dll
 D:\projects\React\smart_shop\backend\duka\bin\Debug\net8.0\System.IdentityModel.Tokens.Jwt.dll
+D:\projects\React\smart_shop\backend\duka\obj\Debug\net8.0\duka.sourcelink.json
